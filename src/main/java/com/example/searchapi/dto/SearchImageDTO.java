@@ -9,12 +9,12 @@ import java.util.List;
 public class SearchImageDTO {
 
     @Builder
-    public record Request(List<String> tags, Integer size, Long nextImageId) {
+    public record Request(List<String> keywords, Integer size, Long nextImageId) {
 
         public Command toCommand(BigDecimal userId) {
             return Command.builder()
                     .userId(userId)
-                    .tags(tags)
+                    .tags(keywords)
                     .size(size)
                     .nextImageId(nextImageId)
                     .build();
