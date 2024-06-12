@@ -39,7 +39,23 @@ public class SearchImageServiceImpl implements SearchImageService {
 
         //tag 테이블로부터 키워드를 가진 tagID를 모두 가져옴
         //엔티티 연관관계 매핑으로 Join 후 쿼리를 한 번만 보내는 것이 좋을까..?
-        List<Long> tagIDs = tagRepository.findAllByTagNameIsIn(command.tags()).stream()
+        List<Tag> tags = tagRepository.findAllByTagNameIsIn(command.tags());
+
+        //검색에 사용된 모든 태그들이 DB에 있는 지 검사함
+        boolean isAllInDB = command.tags().stream()
+                .allMatch(tagName -> tags.stream()
+                        .anyMatch(tag -> tag.getTagName().equals(tagName))
+                );
+
+        //만약 DB에 없는 태그가 있다면 선택되는 이미지가 하나도 없는 것이 정상이므로 빈 리스트를 반환함
+        if (!isAllInDB) {
+            return SearchImageDTO.Response.builder()
+                    .imageIds(Collections.emptyList())
+                    .hasNext(false)
+                    .build();
+        }
+
+        List<Long> tagIDs = tags.stream()
                 .map(Tag::getTagID)
                 .toList();
 
